@@ -37,6 +37,7 @@ module Data.Time.LocalTime.TimeZone.Olson.Types
 where
 
 import Data.Monoid (Monoid(..))
+import Data.Semigroup (Semigroup(..))
 import Control.Monad (mplus)
 
 -- | @OlsonData@ represents a full set of timezone data for a location.
@@ -71,13 +72,15 @@ data OlsonData =
     }
   deriving (Eq, Show)
 
-instance Monoid OlsonData where
-  mempty = OlsonData [] [] [] Nothing
-  mappend (OlsonData a  b  c  d ) (OlsonData a' b' c' d') =
+instance Semigroup OlsonData where
+  (OlsonData a  b  c  d ) <> (OlsonData a' b' c' d') =
       OlsonData (a ++ map (shiftBy $ length b) a')
                 (b ++ b') (c ++ c') (d `mplus` d')
     where
       shiftBy n trans = trans {transIndex = n + transIndex trans}
+
+instance Monoid OlsonData where
+  mempty = OlsonData [] [] [] Nothing
 
 -- | A @Transition@ represents a moment when the clocks change in a
 -- timezone. It consists of a Unix timestamp value that indicates the
